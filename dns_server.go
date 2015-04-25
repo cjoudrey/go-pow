@@ -13,7 +13,7 @@ type DnsServer struct {
 
 func (s *DnsServer) Listen() error {
 	s.setupHandlers()
-	server := &dns.Server{Addr: fmt.Sprintf(":%v", s.Port), Net: "udp"}
+	server := &dns.Server{Addr: fmt.Sprintf("127.0.0.1:%v", s.Port), Net: "udp"}
 	err := server.ListenAndServe()
 	return err
 }
