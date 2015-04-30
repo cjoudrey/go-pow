@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type HttpServer struct {
@@ -24,9 +25,11 @@ func (s *HttpServer) Listen() error {
 func (s *HttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[%s] %s %s %s", r.RemoteAddr, r.Method, r.Host, r.URL)
 
+	host := strings.Split(r.Host, ":")[0]
+
 	var requestApplication *Application
 	for _, application := range s.Applications {
-		if application.Host == r.Host {
+		if application.Host == host {
 			requestApplication = application
 			break
 		}
@@ -43,7 +46,7 @@ func (s *HttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// @TODO Proxy request to application
+	requestApplication.HandleRequest(w, r) // @TODO handle err
 }
 
 func (s *HttpServer) handleApplicationNotFound(w http.ResponseWriter, r *http.Request) {
