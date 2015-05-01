@@ -1,40 +1,37 @@
 package main
 
 import (
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
 	"strconv"
-	"log"
-	"io"
-	"fmt"
-	"net/http"
-	"net"
-	"time"
 	"sync"
+	"syscall"
+	"time"
 )
 
 type Application struct {
-	Dir  string
-	Host string
-	//	LaunchCmd string // @TODO
-	state string
-	port int
-	stdout io.Writer
-	stderr io.Writer
-	cmd *exec.Cmd
-	mutex *sync.Mutex
+	Root      string
+	state     string
+	port      int
+	stdout    io.Writer
+	stderr    io.Writer
+	cmd       *exec.Cmd
+	mutex     *sync.Mutex
 	transport *http.Transport
 }
 
-func NewApplication(dir string, host string) *Application {
+func NewApplication(root string) *Application {
 	application := Application{
-		Dir: dir,
-		Host: host,
-		port: 9999, // @TODO auto-detect
-		stdout: os.Stdout, // @TODO temporary
-		stderr: os.Stdout, // @TODO temporary
-		mutex: &sync.Mutex{},
+		Root:      root,
+		port:      9999,      // @TODO auto-detect
+		stdout:    os.Stdout, // @TODO temporary
+		stderr:    os.Stdout, // @TODO temporary
+		mutex:     &sync.Mutex{},
 		transport: &http.Transport{},
 	}
 
@@ -51,8 +48,8 @@ func (a *Application) Launch() error {
 
 	a.state = "launching"
 
-	a.cmd = exec.Command("rbenv", "exec", "rackup", "-p", strconv.Itoa(a.port))
-	a.cmd.Dir = a.Dir
+	a.cmd = exec.Command("rbenv", "exec", "bundle", "exec", "rackup", "-p", strconv.Itoa(a.port))
+	a.cmd.Dir = a.Root
 
 	a.cmd.Stdout = a.stdout
 	a.cmd.Stderr = a.stderr
@@ -125,7 +122,7 @@ func (a *Application) checkServerIsResponding() error {
 		_, err := net.Dial("tcp", fmt.Sprintf(":%d", a.port))
 
 		if err == nil {
-			break;
+			break
 		} else {
 			time.Sleep(50 * time.Millisecond)
 		}
@@ -141,7 +138,7 @@ func (a *Application) HandleRequest(w http.ResponseWriter, r *http.Request) erro
 
 	r.RequestURI = ""
 	r.URL.Scheme = "http"
-	r.URL.Host = fmt.Sprintf("%s:%d", a.Host, a.port)
+	r.URL.Host = fmt.Sprintf("%s:%d", "127.0.0.1", a.port)
 
 	resp, err := a.transport.RoundTrip(r)
 	if err != nil {
