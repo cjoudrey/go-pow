@@ -10,10 +10,13 @@ import (
 var port = 8000
 
 func SetupServer() {
-	server := DnsServer{
-		Port:    port,
+	configuration := Configuration{
+		DnsPort: port,
 		Domains: []string{"powdev", "powtest"},
 	}
+
+	server := NewDnsServer(&configuration)
+
 	go server.Listen()
 }
 

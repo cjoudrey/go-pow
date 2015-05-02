@@ -8,6 +8,7 @@ import (
 type Configuration struct {
 	HostsRoot string
 	Port      int
+	DnsPort   int
 	Domains   []string
 }
 

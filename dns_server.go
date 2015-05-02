@@ -7,13 +7,19 @@ import (
 )
 
 type DnsServer struct {
-	Port    int
-	Domains []string
+	Configuration *Configuration
+}
+
+func NewDnsServer(configuration *Configuration) *DnsServer {
+	server := DnsServer{
+		Configuration: configuration,
+	}
+	return &server
 }
 
 func (s *DnsServer) Listen() error {
 	s.setupHandlers()
-	server := &dns.Server{Addr: fmt.Sprintf("127.0.0.1:%v", s.Port), Net: "udp"}
+	server := &dns.Server{Addr: fmt.Sprintf("127.0.0.1:%v", s.Configuration.DnsPort), Net: "udp"}
 	err := server.ListenAndServe()
 	return err
 }
@@ -35,7 +41,7 @@ var handler = func(w dns.ResponseWriter, r *dns.Msg) {
 }
 
 func (s *DnsServer) setupHandlers() {
-	for _, domain := range s.Domains {
+	for _, domain := range s.Configuration.Domains {
 		dns.HandleFunc(fmt.Sprintf("%s.", domain), handler)
 	}
 
