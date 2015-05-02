@@ -56,7 +56,7 @@ func NewConfiguration() *Configuration {
 	if envDomains := os.Getenv("POW_DOMAINS"); envDomains != "" {
 		configuration.Domains = strings.Split(envDomains, ",")
 	} else {
-		configuration.Domains = []string{"dev"}
+		configuration.Domains = []string{"pow"}
 	}
 
 	return &configuration
