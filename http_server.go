@@ -51,9 +51,10 @@ func (s *HttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// @TODO cleanup s.Applications[...] if app no longer exists
+	// @TODO terminate/cleanup s.Applications[...] after X minutes of inactivity
 
 	if _, ok := hosts[host]; !ok {
-		s.handleApplicationNotFound(w, r)
+		s.handleHostNotFound(w, r)
 		return
 	}
 
@@ -72,9 +73,9 @@ func (s *HttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.Applications[hosts[host].Root].HandleRequest(w, r) // @TODO handle err
 }
 
-func (s *HttpServer) handleApplicationNotFound(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) handleHostNotFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(fmt.Sprintf("Application <b>%s</b> does not exist.", r.Host)))
+	w.Write([]byte(fmt.Sprintf("Host <b>%s</b> does not exist.", r.Host)))
 }
 
 func (s *HttpServer) handleInternalServerError(err error, w http.ResponseWriter, r *http.Request) {
